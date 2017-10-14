@@ -1,6 +1,13 @@
+try:
+    import dicom
+    __dicom = True
+except ImportError:
+    __dicom = False
+    pass
 import numpy as np
 import random
 import colorsys
+from skimage import img_as_ubyte
 from PyQt4.QtGui import QImage, qRgb
 from sloth.core.exceptions import NotImplementedException
 
@@ -62,3 +69,20 @@ def gen_colors(s=0.99, v=0.99, h=None, color_space='rgb', _golden_ratio_conjugat
         h += _golden_ratio_conjugate
         h %= 1
         yield cs_convert(h, s, v)
+
+
+def get_dicom_image(dicom_filepath):
+    if __dicom:
+        dicom_file = dicom.read_file(dicom_filepath, force=True)
+        if dicom_file.PhotometricInterpretation[:-1] != 'MONOCHROME':
+            raise TypeError('Encountered compressed or rgb pixel data.')
+
+        img = dicom_file._pixel_data_numpy().astype(np.float32)
+        img /= np.power([2.0], dicom_file.BitsStored)[0] - 1.0
+
+        if dicom_file.PhotometricInterpretation[-1] == '1':
+            img = 1.0 - img
+
+        return img_as_ubyte(img)
+    else:
+        return None

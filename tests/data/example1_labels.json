@@ -29,5 +29,9 @@
             }
         ], 
         "filename": "image2.jpg"
+    },
+    {
+        "class": "image",
+        "filename": "dicom.dcm"
     }
 ]

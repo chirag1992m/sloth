@@ -6,6 +6,7 @@ from sloth.core.exceptions import \
     ImproperlyConfigured, NotImplementedException, InvalidArgumentException
 from sloth.core.utils import import_callable
 import logging
+from sloth.utils import get_dicom_image
 LOG = logging.getLogger(__name__)
 
 try:
@@ -155,6 +156,9 @@ class AnnotationContainer:
             LOG.warn("Image file %s does not exist." % fullpath)
             return None
 
+        _, file_extension = os.path.splitext(fullpath)
+        if file_extension == '.dcm':
+            return get_dicom_image(fullpath)
         if _use_pil:
             im = Image.open(fullpath)
             return np.asarray(im)
